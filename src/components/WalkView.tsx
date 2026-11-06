@@ -3,7 +3,7 @@ import { chapterPath, findChapter, WALKS, walkPath } from '../content'
 import { Link } from '../router'
 import type { Walk } from '../types'
 import { Block } from './Block'
-import { Figure } from './Figure'
+import { animDuration, Figure } from './Figure'
 import { TermSheet } from './TermSheet'
 import { TermText } from './TermText'
 
@@ -15,6 +15,10 @@ function initialStep(walk: Walk): number {
 /** 図解：計算や処理の流れを、1ステップずつ図で再生する */
 export function WalkView({ walk }: { walk: Walk }) {
   const [index, setIndex] = useState(() => initialStep(walk))
+  /** 自動で再生しているか */
+  const [playing, setPlaying] = useState(false)
+  /** 「もう一度動かす」で図を描き直すための番号 */
+  const [replay, setReplay] = useState(0)
   const [term, setTerm] = useState<string | null>(null)
   const onTerm = useCallback((id: string) => setTerm((cur) => (cur === id ? null : id)), [])
   const close = useCallback(() => setTerm(null), [])
@@ -31,12 +35,35 @@ export function WalkView({ walk }: { walk: Walk }) {
 
   const go = useCallback((i: number) => setIndex(Math.min(Math.max(i, 0), total - 1)), [total])
 
+  // 自動再生：図が動き終わってから、説明を読む時間をおいて次のステップへ進む。最後で止まる
+  useEffect(() => {
+    if (!playing) return
+    if (index >= total - 1) {
+      const t = window.setTimeout(() => setPlaying(false), (animDuration(step.figure) + 1) * 1000)
+      return () => window.clearTimeout(t)
+    }
+    const wait = (animDuration(step.figure) + 5) * 1000
+    const t = window.setTimeout(() => setIndex((i) => i + 1), wait)
+    return () => window.clearTimeout(t)
+  }, [playing, index, total, step.figure])
+
+  const togglePlay = () => {
+    if (!playing && index >= total - 1) setIndex(0)
+    setPlaying((p) => !p)
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null
       if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
-      if (e.key === 'ArrowRight') go(index + 1)
-      if (e.key === 'ArrowLeft') go(index - 1)
+      if (e.key === 'ArrowRight') {
+        setPlaying(false)
+        go(index + 1)
+      }
+      if (e.key === 'ArrowLeft') {
+        setPlaying(false)
+        go(index - 1)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -64,7 +91,7 @@ export function WalkView({ walk }: { walk: Walk }) {
             {walk.howto.map((h, i) => (
               <li key={i}>{text(h)}</li>
             ))}
-            <li>「次へ」で1ステップずつ進みます。キーボードの ← → でも進めます</li>
+            <li>図は、描かれる順に動きます。「▶ 自動で再生」でステップも自動で進みます。「次へ」やキーボードの ← → で、自分のペースでも進めます</li>
           </ul>
         </details>
       )}
@@ -76,7 +103,10 @@ export function WalkView({ walk }: { walk: Walk }) {
               type="button"
               className={i === index ? 'walk-chip current' : i < index ? 'walk-chip done' : 'walk-chip'}
               aria-current={i === index ? 'step' : undefined}
-              onClick={() => go(i)}
+              onClick={() => {
+                setPlaying(false)
+                go(i)
+              }}
             >
               <span className="walk-chip-no">{i + 1}</span>
               <span className="walk-chip-title">{s.title}</span>
@@ -98,7 +128,15 @@ export function WalkView({ walk }: { walk: Walk }) {
             <p>{step.plain}</p>
           </div>
         )}
-        <Figure figure={step.figure} caption={text(step.title)} legend="このステップで注目するところ" />
+        <div className="walk-play">
+          <button type="button" className="ghost-button" onClick={togglePlay} aria-pressed={playing}>
+            {playing ? '❚❚ 止める' : index >= total - 1 ? '▶ 最初から自動で再生' : '▶ 自動で再生'}
+          </button>
+          <button type="button" className="ghost-button" onClick={() => setReplay((r) => r + 1)}>
+            ↻ もう一度動かす
+          </button>
+        </div>
+        <Figure key={`${index}-${replay}`} figure={step.figure} caption={text(step.title)} legend="このステップで注目するところ" animate />
         <h3 className="walk-detail-label">くわしく</h3>
         <p className="walk-text">{text(step.text)}</p>
         {step.blocks?.map((b, i) => (
@@ -111,11 +149,26 @@ export function WalkView({ walk }: { walk: Walk }) {
           </p>
         )}
         <div className="walk-nav">
-          <button type="button" className="ghost-button" onClick={() => go(index - 1)} disabled={index === 0}>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={() => {
+              setPlaying(false)
+              go(index - 1)
+            }}
+            disabled={index === 0}
+          >
             ← 前へ
           </button>
           {index < total - 1 ? (
-            <button type="button" className="button-primary" onClick={() => go(index + 1)}>
+            <button
+              type="button"
+              className="button-primary"
+              onClick={() => {
+                setPlaying(false)
+                go(index + 1)
+              }}
+            >
               次へ →
             </button>
           ) : chapter ? (

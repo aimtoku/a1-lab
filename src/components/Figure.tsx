@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react'
+import { useId, type CSSProperties, type ReactNode } from 'react'
 import { ANCHOR_HEIGHT } from '../figure/layout'
 import type { CellsFigure, FigActor, FigCell, FigTone, Figure as FigureSpec, GanttFigure, GraphFigure, SeqFigure, XYFigure } from '../types'
 import { deviceShapes } from './Device'
@@ -12,6 +12,9 @@ export function textWidth(s: string, size: number): number {
   for (const ch of s) n += ch.charCodeAt(0) < 0x80 ? 0.58 : 1
   return n * size
 }
+
+/** アニメーションの順番などを、CSSの変数で渡す */
+const cssVars = (vars: Record<string, number>): CSSProperties => Object.fromEntries(Object.entries(vars).map(([k, n]) => [`--${k}`, n])) as CSSProperties
 
 const TONES: readonly FigTone[] = ['normal', 'attack', 'defense', 'blocked', 'muted']
 
@@ -138,7 +141,7 @@ function SeqDiagram({ fig, uid }: { fig: SeqFigure; uid: string }) {
           const w = textWidth(m.label, 10) + 16
           const cx = Math.min(Math.max(x1, w / 2 + 16), width - w / 2 - 2)
           return (
-            <g key={i} className={`fig-msg t-${tone}${m.add ? ' add' : ''}`}>
+            <g key={i} className={`fig-msg anim-msg t-${tone}${m.add ? ' add' : ''}`} style={cssVars({ i })}>
               <rect x={cx - w / 2} y={y - 12} width={w} height={20} rx={4} className="fig-proc" />
               <text x={cx} y={y + 2} textAnchor="middle" fontSize={10} className="fig-proc-text">
                 {m.label}
@@ -153,8 +156,16 @@ function SeqDiagram({ fig, uid }: { fig: SeqFigure; uid: string }) {
         const start = x1 + dir * 3
         const end = tone === 'blocked' ? x1 + (x2 - x1) * 0.62 : x2 - dir * 3
         return (
-          <g key={i} className={`fig-msg t-${tone}${m.add ? ' add' : ''}`}>
-            <line x1={start} y1={y + 6} x2={end} y2={y + 6} className="fig-arrow" markerEnd={tone === 'blocked' ? undefined : `url(#${uid}-a-${tone})`} />
+          <g key={i} className={`fig-msg anim-msg t-${tone}${m.add ? ' add' : ''}`} style={cssVars({ i })}>
+            <line
+              x1={start}
+              y1={y + 6}
+              x2={end}
+              y2={y + 6}
+              pathLength={1}
+              className="fig-arrow anim-draw"
+              markerEnd={tone === 'blocked' ? undefined : `url(#${uid}-a-${tone})`}
+            />
             {tone === 'blocked' && <path d={`M${end - 5},${y + 1} l10,10 M${end + 5},${y + 1} l-10,10`} className="fig-cross" />}
             <Label x={(x1 + x2) / 2} y={y - 3} text={m.label} add={m.add} max={width} />
             <text x={Math.min(x1, x2, labelLeft(m.label, (x1 + x2) / 2, width)) - 8} y={y + 9} textAnchor="end" className="fig-num">
@@ -205,16 +216,25 @@ function CellsDiagram({ fig, uid }: { fig: CellsFigure; uid: string }) {
         const y = i * rowH + 22
         const total = r.cells.reduce((s, c) => s + (c.w ?? 1), 0)
         // 区画が少ない行は、1区画の幅を広げすぎない（幅いっぱいに伸ばすのは、行に1〜2区画のときだけ）
-        const rowUnit = r.cells.length <= 2 && total <= 3 ? (width - pad * 2 - (r.cells.length - 1) * 3) / total : unit
+        const rowUnit = maxCount <= 2 && total <= 3 ? (width - pad * 2 - (r.cells.length - 1) * 3) / total : unit
+        // 文字が区画からはみ出さないよう、文字の長さに合わせて広げる。行の幅に収まらなければ全体を縮める
+        const wanted = r.cells.map((c) => Math.max((c.w ?? 1) * rowUnit, textWidth(c.label, 12) + 14, c.sub ? textWidth(c.sub, 9) + 10 : 0))
+        const room = width - pad * 2 - (r.cells.length - 1) * 3
+        const sum = wanted.reduce((a, b) => a + b, 0)
+        const widths = sum > room ? wanted.map((w) => (w * room) / sum) : wanted
         let x = pad
         return (
-          <g key={i}>
+          <g key={i} className="anim-row" style={cssVars({ i })}>
             <text x={pad} y={y - 8} className="fig-row-caption">
               {r.caption}
             </text>
             {r.cells.map((c, j) => {
-              const w = (c.w ?? 1) * rowUnit
-              const el = <Cell key={j} cell={c} x={x} y={y} w={w} h={cellH} uid={uid} />
+              const w = widths[j]!
+              const el = (
+                <g key={j} className={c.add ? 'anim-cell anim-hot' : 'anim-cell'} style={cssVars({ j })}>
+                  <Cell cell={c} x={x} y={y} w={w} h={cellH} uid={uid} />
+                </g>
+              )
               x += w + 3
               return el
             })}
@@ -286,16 +306,28 @@ function GraphDiagram({ fig, uid }: { fig: GraphFigure; uid: string }) {
         </g>
       ))}
       {lines.map((v, i) => (
-        <g key={i} className={cls(v)}>
-          <line x1={v.x1} y1={v.y1} x2={v.ex} y2={v.ey} markerEnd={v.l.arrow && !v.blocked ? `url(#${uid}-a-${v.tone})` : undefined} />
+        <g key={i} className={`${cls(v)} anim-link`} style={cssVars({ i, n: fig.nodes.length })}>
+          <line
+            x1={v.x1}
+            y1={v.y1}
+            x2={v.ex}
+            y2={v.ey}
+            pathLength={1}
+            className="anim-draw"
+            markerEnd={v.l.arrow && !v.blocked ? `url(#${uid}-a-${v.tone})` : undefined}
+          />
         </g>
       ))}
-      {fig.nodes.map((n) => {
+      {fig.nodes.map((n, i) => {
         const p = pos.get(n.id)!
-        return <Actor key={n.id} actor={n} x={p.x} y={p.y} />
+        return (
+          <g key={n.id} className={n.add ? 'anim-node anim-hot' : 'anim-node'} style={cssVars({ i })}>
+            <Actor actor={n} x={p.x} y={p.y} />
+          </g>
+        )
       })}
       {lines.map((v, i) => (
-        <g key={i} className={cls(v)}>
+        <g key={i} className={`${cls(v)} anim-link-label`} style={cssVars({ i, n: fig.nodes.length })}>
           {v.blocked && <path d={`M${v.ex - 5},${v.ey - 5} l10,10 M${v.ex + 5},${v.ey - 5} l-10,10`} className="fig-cross" />}
           {v.l.label && <Label x={v.lx} y={v.ly} text={v.l.label} size={9.5} add={v.l.add} max={width} />}
         </g>
@@ -358,14 +390,14 @@ function XYDiagram({ fig, uid }: { fig: XYFigure; uid: string }) {
         const pts = s.points.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(' ')
         const [lx, ly] = s.points[s.points.length - 1]!
         return (
-          <g key={i} className={`fig-series t-${s.tone ?? 'normal'}${s.add ? ' add' : ''}`}>
-            <polyline points={pts} className="fig-series-line" />
+          <g key={i} className={`fig-series anim-series t-${s.tone ?? 'normal'}${s.add ? ' add' : ''}`} style={cssVars({ i })}>
+            <polyline points={pts} pathLength={1} className="fig-series-line anim-draw" />
             <Label x={Math.min(sx(lx), width - 40)} y={sy(ly) - 8} text={s.label} add={s.add} max={width} />
           </g>
         )
       })}
       {fig.marks?.map((mk, i) => (
-        <g key={i} className={mk.add ? 'fig-mark add' : 'fig-mark'}>
+        <g key={i} className={mk.add ? 'fig-mark add anim-mark' : 'fig-mark anim-mark'} style={cssVars({ i, n: fig.series.length })}>
           <line x1={sx(mk.x)} y1={sy(mk.y)} x2={sx(mk.x)} y2={top + ph} className="fig-mark-guide" />
           <circle cx={sx(mk.x)} cy={sy(mk.y)} r={4.5} className="fig-mark-dot" />
           <Label x={sx(mk.x)} y={sy(mk.y) + 22} text={mk.label} add={mk.add} max={width} />
@@ -413,7 +445,7 @@ function GanttDiagram({ fig, uid }: { fig: GanttFigure; uid: string }) {
               const x = labelW + b.start * unit
               const w = b.len * unit
               return (
-                <g key={j} className={`fig-cell c-${b.c ?? 'blue'}${b.add ? ' add' : ''}`}>
+                <g key={j} className={`fig-cell anim-bar c-${b.c ?? 'blue'}${b.add ? ' add' : ''}`} style={cssVars({ s: b.start, l: b.len })}>
                   <rect x={x + 1} y={y} width={Math.max(w - 2, 2)} height={rowH - 10} rx={3} className="fig-cell-box" />
                   {b.label && textWidth(b.label, 10) < w - 4 && (
                     <text x={x + w / 2} y={y + 16} textAnchor="middle" className="fig-cell-label" fontSize={10}>
@@ -446,21 +478,42 @@ export function hasAdd(fig: FigureSpec): boolean {
   }
 }
 
-/** 図。caption は図の下に出し、読み上げ用の名前にも使う */
+/**
+ * 図が動き終わるまでの秒数（styles.css の「図の動き」と合わせる）。
+ * 図解の自動再生で、次のステップへ進むまでの時間に使う
+ */
+export function animDuration(fig: FigureSpec): number {
+  switch (fig.kind) {
+    case 'seq':
+      return Math.max(0, fig.messages.length - 1) * 0.8 + 0.7
+    case 'cells':
+      return Math.max(0, fig.rows.length - 1) * 0.45 + 1.0
+    case 'graph':
+      return fig.nodes.length * 0.12 + fig.links.length * 0.35 + 0.8
+    case 'xy':
+      return fig.series.length * 0.9 + 1.2 + (fig.marks?.length ? 0.6 : 0)
+    case 'gantt':
+      return Math.max(0, ...fig.rows.flatMap((r) => r.bars.map((b) => b.start + b.len))) * 0.35 + 0.3
+  }
+}
+
+/** 図。caption は図の下に出し、読み上げ用の名前にも使う。animate を付けると、描かれる順に動かして見せる */
 export function Figure({
   figure,
   caption,
   number,
   legend = 'この節で加わったもの',
+  animate = false,
 }: {
   figure: FigureSpec
   caption: ReactNode
   number?: string
   legend?: string
+  animate?: boolean
 }) {
   const uid = `f${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (
-    <figure className="book-fig">
+    <figure className={animate ? 'book-fig fig-animate' : 'book-fig'}>
       <div className="fig-scroll" role="img" aria-labelledby={`${uid}-cap`}>
         {figure.kind === 'seq' && <SeqDiagram fig={figure} uid={uid} />}
         {figure.kind === 'cells' && <CellsDiagram fig={figure} uid={uid} />}

@@ -1,6 +1,6 @@
 import type { Chapter, Walk } from '../../types'
 import { algo, binsearch, bubble, stack } from './algo'
-import { adder, basics, huffman, radix } from './basics'
+import { adder, basics, huffman, prob, radix } from './basics'
 import { cache, computer, pipeline } from './computer'
 import { db, deadlock, normalize, recovery } from './db'
 import { dev, devmgmt, testcases } from './dev'
@@ -17,6 +17,7 @@ export const TECH_WALKS: readonly Walk[] = [
   radix,
   adder,
   huffman,
+  prob,
   stack,
   binsearch,
   bubble,
