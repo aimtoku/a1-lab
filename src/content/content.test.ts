@@ -3,6 +3,7 @@ import { blockText, chapterTerms, placesOf } from '../glossary/match'
 import { TERMS } from '../glossary/terms'
 import type { Figure } from '../types'
 import { AREAS, CHAPTERS, findWalk, WALKS } from './index'
+import { PLAIN } from './plain'
 
 /** 図の部品の参照（IDの重複、存在しない部品への参照）を確かめる */
 function check(fig: Figure, where: string) {
@@ -159,5 +160,21 @@ describe('用語', () => {
 
   it('説明が空でない', () => {
     for (const t of TERMS) expect(t.description.trim(), t.id).not.toBe('')
+  })
+})
+
+describe('図解の「図の見かた」と「ひとことで」', () => {
+  it('すべての図解にあり、ステップの数と合っている', () => {
+    for (const w of WALKS) {
+      const plain = PLAIN[w.id]
+      expect(plain, w.id).toBeDefined()
+      expect(plain!.howto.length, w.id).toBeGreaterThanOrEqual(2)
+      expect(plain!.plain.length, w.id).toBe(w.steps.length)
+      for (const t of plain!.plain) expect(t.endsWith('。'), `${w.id}：${t}`).toBe(true)
+    }
+  })
+
+  it('使われていない図解のIDがない', () => {
+    for (const id of Object.keys(PLAIN)) expect(findWalk(id), id).toBeDefined()
   })
 })

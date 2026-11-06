@@ -4030,3 +4030,32 @@ ol.cards {
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+/* 図解：初めて学ぶ人向けの「図の見かた」と「ひとことで」 */
+.walk-howto {
+  margin-top: 16px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.walk-howto summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.walk-howto .plain-list {
+  margin: 8px 0 2px;
+}
+
+.walk-plain {
+  margin: 4px 0 14px;
+}
+
+.walk-detail-label {
+  margin: 14px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
