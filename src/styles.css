@@ -4850,3 +4850,448 @@ ol.cards {
 .scene-seg.current {
   background: color-mix(in srgb, var(--accent) 30%, var(--soft));
 }
+
+.sc-person-label {
+  fill: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sc-rr-a {
+  fill: color-mix(in srgb, #3f7fd6 35%, var(--panel));
+  stroke: #3f7fd6;
+  stroke-width: 2;
+}
+
+.sc-rr-b {
+  fill: color-mix(in srgb, #d98b1c 35%, var(--panel));
+  stroke: #d98b1c;
+  stroke-width: 2;
+}
+
+.sc-rr-c {
+  fill: color-mix(in srgb, #2e9b6a 35%, var(--panel));
+  stroke: #2e9b6a;
+  stroke-width: 2;
+}
+
+.sc-st-1 {
+  fill: color-mix(in srgb, #3f7fd6 30%, var(--panel));
+  stroke: #3f7fd6;
+  stroke-width: 1.5;
+}
+
+.sc-st-2 {
+  fill: color-mix(in srgb, #8a5cd6 30%, var(--panel));
+  stroke: #8a5cd6;
+  stroke-width: 1.5;
+}
+
+.sc-st-3 {
+  fill: color-mix(in srgb, #d98b1c 30%, var(--panel));
+  stroke: #d98b1c;
+  stroke-width: 1.5;
+}
+
+.sc-st-4 {
+  fill: color-mix(in srgb, #2e9b6a 30%, var(--panel));
+  stroke: #2e9b6a;
+  stroke-width: 1.5;
+}
+
+.sc-bar-fixed {
+  fill: color-mix(in srgb, var(--ok) 45%, var(--panel));
+  stroke: var(--ok);
+  stroke-width: 2;
+}
+
+.sc-pop {
+  animation: sc-pop 0.45s ease-out both;
+}
+
+@keyframes sc-pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.sc-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-pop {
+    animation: none;
+  }
+}
+
+.sc-zone-ng {
+  fill: var(--atk);
+  opacity: 0.55;
+}
+
+.sc-zone-a {
+  fill: #d98b1c;
+  opacity: 0.7;
+}
+
+.sc-zone-b {
+  fill: var(--ok);
+  opacity: 0.7;
+}
+
+.sc-pin {
+  fill: var(--accent);
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.sc-pin-edge {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 2;
+}
+
+.sc-pin-bug {
+  fill: var(--atk);
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.sc-lamp-on {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 2;
+}
+
+.sc-lamp-off {
+  fill: var(--soft);
+  stroke: var(--gray);
+  stroke-width: 2;
+}
+
+.sc-wave {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.sc-sample {
+  stroke: #c98d00;
+  stroke-width: 2;
+}
+
+.sc-dot {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 1.5;
+}
+
+.sc-knob {
+  fill: #ffffff;
+  stroke: var(--gray);
+  stroke-width: 1.5;
+}
+
+.sc-wire {
+  fill: none;
+  stroke: var(--gray);
+  stroke-width: 3;
+}
+
+.sc-wire-on {
+  fill: none;
+  stroke: #e0a800;
+  stroke-width: 4;
+}
+
+.sc-tree-edge {
+  stroke: var(--muted);
+  stroke-width: 2.5;
+}
+
+.sc-bit {
+  fill: var(--panel);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sc-leaf {
+  fill: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.sc-node {
+  fill: var(--panel);
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.sc-doc {
+  fill: #ffffff;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.sc-doc-bad {
+  fill: #ffffff;
+  stroke: var(--atk);
+  stroke-width: 2.5;
+}
+
+.sc-key-secret {
+  fill: var(--atk);
+}
+
+.sc-key-public {
+  fill: var(--ok);
+}
+
+.sc-seal {
+  fill: var(--atk);
+  opacity: 0.9;
+}
+
+.sc-seal-text {
+  fill: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sc-th {
+  fill: color-mix(in srgb, var(--accent) 14%, var(--panel));
+  stroke: var(--line);
+}
+
+.sc-td {
+  fill: var(--panel);
+  stroke: var(--line);
+}
+
+.sc-dup {
+  fill: color-mix(in srgb, var(--atk) 16%, var(--panel));
+  stroke: var(--line);
+}
+
+.sc-th-text {
+  fill: var(--fg);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sc-th-key {
+  fill: var(--fg);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.sc-td-text {
+  fill: var(--fg);
+  font-size: 13px;
+}
+
+.sc-dep {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.sc-lock-1 {
+  fill: #3f7fd6;
+}
+
+.sc-lock-2 {
+  fill: #d98b1c;
+}
+
+.sc-shackle-1 {
+  fill: none;
+  stroke: #3f7fd6;
+  stroke-width: 4;
+}
+
+.sc-shackle-2 {
+  fill: none;
+  stroke: #d98b1c;
+  stroke-width: 4;
+}
+
+.sc-own-1 {
+  fill: none;
+  stroke: #3f7fd6;
+  stroke-width: 3;
+}
+
+.sc-own-2 {
+  fill: none;
+  stroke: #d98b1c;
+  stroke-width: 3;
+}
+
+.sc-wait-line {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 6;
+}
+
+.sc-wait-red {
+  fill: none;
+  stroke: var(--atk);
+  stroke-width: 3;
+  stroke-dasharray: 7 6;
+}
+
+.sc-bolt {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 1.5;
+}
+
+.sc-forward {
+  fill: var(--ok);
+  opacity: 0.75;
+}
+
+.sc-back {
+  fill: none;
+  stroke: var(--atk);
+  stroke-width: 4;
+}
+
+.sc-net {
+  fill: color-mix(in srgb, var(--accent) 30%, var(--panel));
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.sc-host {
+  fill: color-mix(in srgb, #d98b1c 30%, var(--panel));
+  stroke: #d98b1c;
+  stroke-width: 1.5;
+}
+
+.sc-pipe {
+  fill: var(--soft);
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+.sc-pipe-ctrl {
+  fill: color-mix(in srgb, var(--gray) 30%, var(--soft));
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+.sc-pipe-data {
+  fill: color-mix(in srgb, var(--ok) 50%, var(--panel));
+}
+
+.sc-grow-slow {
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 8s linear 0.4s;
+}
+
+.sc-wheel {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 4;
+}
+
+.sc-frame {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sc-wait-day {
+  fill: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.sc-safety {
+  fill: color-mix(in srgb, var(--ok) 18%, transparent);
+}
+
+.sc-stock {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.sc-clip {
+  transition: width 1.6s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-grow-slow,
+  .sc-clip {
+    transition-duration: 0.01s;
+  }
+}
+
+.sc-invest {
+  fill: color-mix(in srgb, var(--atk) 35%, var(--panel));
+  stroke: var(--atk);
+  stroke-width: 1.5;
+}
+
+.sc-gain {
+  fill: color-mix(in srgb, var(--ok) 55%, var(--panel));
+  stroke: var(--ok);
+  stroke-width: 1.5;
+}
+
+.sc-quad-00 {
+  fill: color-mix(in srgb, #ffcf3f 22%, var(--panel));
+}
+
+.sc-quad-10 {
+  fill: color-mix(in srgb, #8a5cd6 16%, var(--panel));
+}
+
+.sc-quad-01 {
+  fill: color-mix(in srgb, var(--ok) 18%, var(--panel));
+}
+
+.sc-quad-11 {
+  fill: color-mix(in srgb, var(--gray) 22%, var(--panel));
+}
+
+.sc-quad-frame {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+
+.sc-biz {
+  fill: var(--accent);
+  opacity: 0.85;
+}
+
+.sc-coin {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 1.5;
+}
+
+.sc-pipe-edge {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+}
