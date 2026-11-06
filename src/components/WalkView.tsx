@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 import { chapterPath, findChapter, WALKS, walkPath } from '../content'
 import { Link } from '../router'
+import { SCENES, ScenePlayer } from '../scenes'
 import type { Walk } from '../types'
 import { Block } from './Block'
 import { animDuration, Figure } from './Figure'
@@ -35,6 +36,10 @@ export function WalkView({ walk }: { walk: Walk }) {
 
   const go = useCallback((i: number) => setIndex(Math.min(Math.max(i, 0), total - 1)), [total])
 
+  /** 自動再生で、次のステップへ進むまでの時間（ミリ秒） */
+  const wait = (animDuration(step.figure) + 5) * 1000
+  const scene = SCENES[walk.id]
+
   // 自動再生：図が動き終わってから、説明を読む時間をおいて次のステップへ進む。最後で止まる
   useEffect(() => {
     if (!playing) return
@@ -42,10 +47,9 @@ export function WalkView({ walk }: { walk: Walk }) {
       const t = window.setTimeout(() => setPlaying(false), (animDuration(step.figure) + 1) * 1000)
       return () => window.clearTimeout(t)
     }
-    const wait = (animDuration(step.figure) + 5) * 1000
     const t = window.setTimeout(() => setIndex((i) => i + 1), wait)
     return () => window.clearTimeout(t)
-  }, [playing, index, total, step.figure])
+  }, [playing, index, total, step.figure, wait])
 
   const togglePlay = () => {
     if (!playing && index >= total - 1) setIndex(0)
@@ -83,6 +87,14 @@ export function WalkView({ walk }: { walk: Walk }) {
         <h1>{walk.title}</h1>
         <p className="lead">{text(walk.lead)}</p>
       </header>
+
+      {scene && (
+        <>
+          <h2 className="walk-section-label">動く図解（絵で見る）</h2>
+          <ScenePlayer scene={scene} />
+          <h2 className="walk-section-label">図と式で確かめる</h2>
+        </>
+      )}
 
       {walk.howto && (
         <details className="walk-howto" open>
@@ -129,13 +141,23 @@ export function WalkView({ walk }: { walk: Walk }) {
           </div>
         )}
         <div className="walk-play">
-          <button type="button" className="ghost-button" onClick={togglePlay} aria-pressed={playing}>
-            {playing ? '❚❚ 止める' : index >= total - 1 ? '▶ 最初から自動で再生' : '▶ 自動で再生'}
+          <span className={`scene-status ${playing ? 'playing' : 'paused'}`}>
+            <span className="scene-status-dot" aria-hidden="true" />
+            {playing ? '自動再生中' : '止まっています'}
+          </span>
+          <button type="button" className={playing ? 'ghost-button' : 'button-primary'} onClick={togglePlay} aria-pressed={playing}>
+            {playing ? '❚❚ 一時停止' : index >= total - 1 ? '▶ 最初から自動で再生' : '▶ 自動で再生'}
           </button>
           <button type="button" className="ghost-button" onClick={() => setReplay((r) => r + 1)}>
             ↻ もう一度動かす
           </button>
         </div>
+        {playing && index < total - 1 && (
+          <div className="walk-timer" aria-hidden="true">
+            <span key={`${index}-${replay}`} className="scene-seg-fill running" style={{ '--d': `${wait}ms` } as CSSProperties} />
+            <span className="walk-timer-label">次のステップまで</span>
+          </div>
+        )}
         <Figure key={`${index}-${replay}`} figure={step.figure} caption={text(step.title)} legend="このステップで注目するところ" animate />
         <h3 className="walk-detail-label">くわしく</h3>
         <p className="walk-text">{text(step.text)}</p>

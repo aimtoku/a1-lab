@@ -4216,3 +4216,637 @@ ol.cards {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* ===== 動く図解（紙芝居）===== */
+.scene {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.scene-stage {
+  position: relative;
+  background: color-mix(in srgb, var(--soft) 55%, var(--panel));
+  border-bottom: 1px solid var(--line);
+}
+
+.scene-svg {
+  display: block;
+  width: 100%;
+  max-width: 820px;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--sans);
+}
+
+/* 再生前は、絵の上に大きな再生ボタンを出す */
+.scene-big-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--scroll-shadow);
+}
+
+.scene-big-play-icon {
+  font-size: 1.1rem;
+}
+
+.scene-caption {
+  padding: 14px 18px 4px;
+  min-height: 5.2em;
+}
+
+.scene-say {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.scene-beat-no {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--point-bg);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  vertical-align: 2px;
+}
+
+.scene-formula {
+  margin: 6px 0 0;
+  padding: 6px 12px;
+  border-left: 3px solid var(--term-line);
+  background: var(--term-bg);
+  font-family: var(--mono), var(--sans);
+  font-size: 0.95rem;
+  overflow-x: auto;
+}
+
+/* 進み具合：場面ごとの区切り。いまの場面は、時間に合わせて伸びる */
+.scene-progress {
+  display: flex;
+  gap: 4px;
+  padding: 10px 18px 0;
+}
+
+.scene-seg {
+  position: relative;
+  flex: 1;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--soft);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.scene-seg.done {
+  background: var(--accent);
+}
+
+.scene-seg-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: var(--accent);
+  border-radius: inherit;
+}
+
+.scene-seg-fill.full {
+  width: 100%;
+}
+
+.scene-seg-fill.running {
+  animation: scene-fill var(--d) linear forwards;
+}
+
+@keyframes scene-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.scene-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 18px 16px;
+}
+
+.scene-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.scene-toggle {
+  min-width: 9.5em;
+}
+
+/* 状態の表示：再生中は緑の点が脈打つ。一時停止中は黄、終わりは灰 */
+.scene-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.scene-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gray);
+}
+
+.scene-status.playing {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.scene-status.playing .scene-status-dot {
+  background: var(--ok);
+  animation: scene-pulse 1.2s ease-in-out infinite;
+}
+
+.scene-status.paused {
+  background: var(--term-bg);
+  color: var(--term-line);
+}
+
+.scene-status.paused .scene-status-dot {
+  background: var(--term-line);
+}
+
+.scene-status.ready {
+  background: var(--point-bg);
+  color: var(--accent);
+}
+
+.scene-status.ready .scene-status-dot {
+  background: var(--accent);
+}
+
+@keyframes scene-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+}
+
+/* 絵の中の部品 */
+.sc-move {
+  transition:
+    transform 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.6s ease;
+}
+
+.sc-fade {
+  transition: opacity 0.6s ease;
+}
+
+.sc-color {
+  transition:
+    fill 0.6s ease,
+    stroke 0.6s ease,
+    opacity 0.6s ease;
+}
+
+.sc-grow {
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 1.2s linear;
+}
+
+.sc-text {
+  fill: var(--fg);
+  font-size: 15px;
+}
+
+.sc-small {
+  fill: var(--muted);
+  font-size: 12px;
+}
+
+.sc-big {
+  fill: var(--fg);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.sc-title {
+  fill: var(--fg);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sc-line {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.sc-panel {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.sc-hot {
+  fill: var(--term-bg);
+  stroke: var(--term-line);
+  stroke-width: 2.5;
+}
+
+.sc-red {
+  fill: #e0574a;
+  stroke: #b8392d;
+  stroke-width: 1.5;
+}
+
+.sc-white {
+  fill: #ffffff;
+  stroke: #9aa5b8;
+  stroke-width: 1.5;
+}
+
+.sc-on {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 2;
+}
+
+.sc-off {
+  fill: var(--soft);
+  stroke: var(--gray);
+  stroke-width: 1.5;
+}
+
+.sc-ok {
+  fill: var(--ok);
+}
+
+.sc-ng {
+  fill: var(--atk);
+}
+
+.sc-dim {
+  opacity: 0.25;
+}
+
+.sc-accent {
+  fill: var(--accent);
+}
+
+.sc-accent-stroke {
+  stroke: var(--accent);
+  stroke-width: 3;
+  fill: none;
+}
+
+.sc-red-stroke {
+  stroke: var(--atk);
+  stroke-width: 4;
+  fill: none;
+}
+
+.sc-glow {
+  filter: drop-shadow(0 0 6px #ffcf3f);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-move,
+  .sc-fade,
+  .sc-color,
+  .sc-grow {
+    transition-duration: 0.01s;
+  }
+
+  .scene-status.playing .scene-status-dot {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .scene-say {
+    font-size: 1rem;
+  }
+
+  .scene-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scene-buttons {
+    justify-content: space-between;
+  }
+}
+
+.sc-growy {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sc-drop {
+  animation: sc-drop 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+
+@keyframes sc-drop {
+  from {
+    opacity: 0;
+    translate: 0 -70px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-growy {
+    transition-duration: 0.01s;
+  }
+
+  .sc-drop {
+    animation: none;
+  }
+}
+
+.sc-person {
+  fill: var(--accent);
+  opacity: 0.85;
+}
+
+.sc-tag-ok {
+  fill: var(--ok-bg);
+  stroke: var(--ok);
+  stroke-width: 2;
+}
+
+.sc-tag-ng {
+  fill: var(--atk-bg, var(--term-bg));
+  stroke: var(--atk);
+  stroke-width: 2;
+}
+
+.sc-mono {
+  fill: var(--fg);
+  font-family: var(--mono);
+  font-size: 18px;
+  white-space: pre;
+}
+
+.sc-ng-text {
+  fill: var(--atk);
+}
+
+.sc-ok-text {
+  fill: var(--ok);
+}
+
+.sc-carry {
+  fill: none;
+  stroke: var(--atk);
+  stroke-width: 3;
+  stroke-dasharray: 5 4;
+}
+
+.sc-bag {
+  fill: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sc-bag-tie {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.sc-ball-label {
+  fill: #2b3445;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sc-ball-label-red {
+  fill: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sc-box {
+  fill: color-mix(in srgb, var(--soft) 60%, transparent);
+  stroke: var(--fg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.sc-plate {
+  fill: var(--panel);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.sc-desk {
+  fill: var(--muted);
+}
+
+.sc-shelf {
+  fill: color-mix(in srgb, var(--ok) 16%, var(--panel));
+  stroke: var(--ok);
+  stroke-width: 2;
+}
+
+.sc-house {
+  fill: color-mix(in srgb, var(--muted) 16%, var(--panel));
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.sc-road {
+  fill: none;
+  stroke: var(--gray);
+  stroke-width: 3;
+  stroke-dasharray: 10 8;
+}
+
+.sc-data {
+  fill: #ffcf3f;
+  stroke: #c98d00;
+  stroke-width: 2;
+}
+
+.sc-cover {
+  fill: color-mix(in srgb, var(--soft) 55%, var(--panel));
+}
+
+.sc-travel {
+  translate: var(--tx) var(--ty);
+  animation: sc-travel 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+}
+
+@keyframes sc-travel {
+  from {
+    translate: var(--fx) var(--fy);
+  }
+  to {
+    translate: var(--tx) var(--ty);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-travel {
+    animation: none;
+  }
+}
+
+.sc-day-up {
+  fill: color-mix(in srgb, var(--ok) 55%, var(--panel));
+}
+
+.sc-day-down {
+  fill: var(--atk);
+}
+
+.sc-slot {
+  fill: none;
+  stroke: var(--gray);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.sc-book-spine {
+  fill: var(--accent);
+  opacity: 0.7;
+}
+
+.sc-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.sc-bar {
+  fill: color-mix(in srgb, var(--accent) 22%, var(--panel));
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sc-bar-critical {
+  fill: color-mix(in srgb, var(--atk) 20%, var(--panel));
+  stroke: var(--atk);
+  stroke-width: 3;
+}
+
+.sc-bar-text {
+  fill: var(--fg);
+  font-size: 13px;
+}
+
+.sc-wait {
+  fill: none;
+  stroke: var(--gray);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+
+.sc-margin {
+  fill: color-mix(in srgb, var(--ok) 60%, var(--panel));
+}
+
+.sc-profit {
+  fill: #ffcf3f;
+}
+
+.sc-flow {
+  fill: none;
+  stroke: var(--ok);
+  stroke-width: 3;
+  stroke-dasharray: 8 6;
+}
+
+.walk-section-label {
+  margin: 28px 0 0;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.walk-section-label::before {
+  content: '';
+  width: 6px;
+  height: 1.2em;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.walk-play {
+  align-items: center;
+}
+
+.walk-timer {
+  position: relative;
+  height: 18px;
+  margin: 8px 0 0;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.walk-timer .scene-seg-fill {
+  opacity: 0.35;
+}
+
+.walk-timer-label {
+  position: relative;
+  display: block;
+  padding-left: 10px;
+  font-size: 0.75rem;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.walk-play .button-primary {
+  padding: 5px 12px;
+  font-size: 0.85rem;
+}
+
+.scene-seg.current {
+  background: color-mix(in srgb, var(--accent) 30%, var(--soft));
+}
