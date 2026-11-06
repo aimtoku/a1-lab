@@ -1,0 +1,17 @@
+// Cloudflare Workers の設定。Workerのコードは持たず、静的ファイル（dist）だけを配信する。
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "a1-lab",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // /book/basics などのURLに直接アクセスしたときも index.html を返す
+    "not_found_handling": "single-page-application"
+  },
+  "workers_dev": true,
+  // PRごとの確認用URLを有効にする
+  "preview_urls": true,
+  // PRのブランチを wrangler preview で確認用に公開するための設定（中身は空でよい。
+  // 静的ファイルの設定は上の assets がそのまま使われる）
+  "previews": {}
+}
