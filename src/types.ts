@@ -174,6 +174,8 @@ export interface WalkStep {
   blocks?: readonly Block[]
   /** 押さえる点 */
   point?: string
+  /** ひとことで：専門用語を使わない説明（src/content/plain.ts から付ける） */
+  plain?: string
 }
 
 /** 図解：計算や処理の流れを、1ステップずつ再生する */
@@ -184,4 +186,6 @@ export interface Walk {
   title: string
   lead: string
   steps: readonly WalkStep[]
+  /** 図の見かた（src/content/plain.ts から付ける） */
+  howto?: readonly string[]
 }

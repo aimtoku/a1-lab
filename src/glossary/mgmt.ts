@@ -153,4 +153,10 @@ export const MGMT_TERMS: readonly Term[] = [
     aliases: ['職務の分離'],
     description: '不正や誤りを防ぐため、承認・実行・記録などの職務を、別の人に分担させること。',
   },
+  {
+    id: 'gantt',
+    name: 'ガントチャート',
+    aliases: ['ガントチャート'],
+    description: '作業の予定と実績を、横棒で表す図。進み具合がひと目で分かるが、作業どうしの順序の関係は表しにくい。',
+  },
 ]

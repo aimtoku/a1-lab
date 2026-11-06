@@ -57,6 +57,18 @@ export function WalkView({ walk }: { walk: Walk }) {
         <p className="lead">{text(walk.lead)}</p>
       </header>
 
+      {walk.howto && (
+        <details className="walk-howto" open>
+          <summary>図の見かた</summary>
+          <ul className="plain-list">
+            {walk.howto.map((h, i) => (
+              <li key={i}>{text(h)}</li>
+            ))}
+            <li>「次へ」で1ステップずつ進みます。キーボードの ← → でも進めます</li>
+          </ul>
+        </details>
+      )}
+
       <ol className="walk-steps" aria-label="ステップ">
         {walk.steps.map((s, i) => (
           <li key={i}>
@@ -78,7 +90,16 @@ export function WalkView({ walk }: { walk: Walk }) {
           STEP {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
         </p>
         <h2 id="walk-step-title">{step.title}</h2>
+        {step.plain && (
+          <div className="plain walk-plain">
+            <div className="plain-head">
+              <span className="plain-label">ひとことで</span>
+            </div>
+            <p>{step.plain}</p>
+          </div>
+        )}
         <Figure figure={step.figure} caption={text(step.title)} legend="このステップで注目するところ" />
+        <h3 className="walk-detail-label">くわしく</h3>
         <p className="walk-text">{text(step.text)}</p>
         {step.blocks?.map((b, i) => (
           <Block key={i} block={b} text={text} />
