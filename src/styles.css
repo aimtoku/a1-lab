@@ -4059,3 +4059,160 @@ ol.cards {
   font-weight: 700;
   color: var(--muted);
 }
+
+/* ===== 図の動き（図解のステップ）=====
+ * 図を描かれる順に動かして、何がどの順で起きるかを見せる。
+ * 秒数は Figure.tsx の animDuration と合わせる。動きを減らす設定の利用者には動かさない。
+ */
+@keyframes fig-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fig-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fig-draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fig-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fig-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* シーケンス図：やり取りを1つずつ。矢印は送り元から伸びる */
+  .fig-animate .anim-msg {
+    animation: fig-fade-in 0.35s ease-out both;
+    animation-delay: calc(var(--i) * 0.8s);
+  }
+
+  .fig-animate .anim-msg .anim-draw {
+    animation: fig-draw 0.6s ease-out backwards;
+    animation-delay: calc(var(--i) * 0.8s);
+  }
+
+  /* 区画：行を上から順に。注目する区画は、現れたあと弾む */
+  .fig-animate .anim-row {
+    animation: fig-rise-in 0.4s ease-out both;
+    animation-delay: calc(var(--i) * 0.45s);
+  }
+
+  .fig-animate .anim-cell {
+    animation: fig-fade-in 0.3s ease-out both;
+    animation-delay: calc(var(--j) * 0.04s);
+  }
+
+  .fig-animate .anim-cell.anim-hot,
+  .fig-animate .anim-node.anim-hot {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation:
+      fig-fade-in 0.3s ease-out both,
+      fig-pop 0.5s ease-in-out 0.5s 1;
+  }
+
+  /* グラフ：点が現れてから、線を1本ずつ描く */
+  .fig-animate .anim-node {
+    animation: fig-fade-in 0.35s ease-out both;
+    animation-delay: calc(var(--i) * 0.12s);
+  }
+
+  .fig-animate .anim-link {
+    animation: fig-fade-in 0.15s linear both;
+    animation-delay: calc(var(--n) * 0.12s + var(--i) * 0.35s);
+  }
+
+  .fig-animate .anim-link .anim-draw {
+    animation: fig-draw 0.5s ease-out backwards;
+    animation-delay: calc(var(--n) * 0.12s + var(--i) * 0.35s);
+  }
+
+  .fig-animate .anim-link-label {
+    animation: fig-fade-in 0.3s ease-out both;
+    animation-delay: calc(var(--n) * 0.12s + var(--i) * 0.35s + 0.3s);
+  }
+
+  /* 折れ線：線を左から描き、そのあと注目する点を出す */
+  .fig-animate .anim-series .anim-draw {
+    animation: fig-draw 1.2s ease-in-out backwards;
+    animation-delay: calc(var(--i) * 0.9s);
+  }
+
+  .fig-animate .anim-series .fig-label {
+    animation: fig-fade-in 0.3s ease-out both;
+    animation-delay: calc(var(--i) * 0.9s + 1s);
+  }
+
+  .fig-animate .anim-mark {
+    animation: fig-rise-in 0.4s ease-out both;
+    animation-delay: calc(var(--n) * 0.9s + 1.2s);
+  }
+
+  /* ガントチャート：時間の流れに合わせて、帯を左から伸ばす */
+  .fig-animate .anim-bar rect {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: fig-grow calc(var(--l) * 0.35s) linear both;
+    animation-delay: calc(var(--s) * 0.35s);
+  }
+
+  .fig-animate .anim-bar text {
+    animation: fig-fade-in 0.2s ease-out both;
+    animation-delay: calc((var(--s) + var(--l)) * 0.35s - 0.1s);
+  }
+}
+
+/* 図解の再生のボタン */
+.walk-play {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 10px;
+}
+
+.walk-play .ghost-button {
+  padding: 5px 12px;
+  font-size: 0.85rem;
+}
+
+.walk-play .ghost-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
